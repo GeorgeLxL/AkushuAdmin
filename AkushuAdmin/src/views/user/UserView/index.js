@@ -125,14 +125,7 @@ class UserView extends Component {
       Alertmodal:false,
       alertTitle:"",
       alertContent:"",
-      spin:false,
-      emailModal: false,
-      userid: '',
-      newEmail: '',
-      newEmailConfirm: '',
-      error: '',
-      passwordModal: false,
-      deleteModal: false,
+      spin:false
     };
   }
 
@@ -249,9 +242,9 @@ class UserView extends Component {
       var config = {
         method: 'post',
         url: `${baseurl}/api/getusers`,
-        headers: {
+        headers: { 
           'Authorization': 'Bearer ' + token,
-        },
+      },
         data : filter,
       };
       this.setState({
@@ -298,147 +291,12 @@ class UserView extends Component {
     }); 
   }
 
-  emailModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      emailModal: true
-    })
-  }
-
-  changeEmail = e => {
-    e.preventDefault()
-    const {newEmail, newEmailConfirm, userid} = this.state
-    if (newEmail == '') return
-    if (newEmailConfirm == '') return
-    if (newEmail !=newEmailConfirm) return
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'email': newEmail, 'id': userid})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/changeuseremail`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({emailModal: false, newEmail: '', newEmailConfirm: ''})
-      this.getuserData(this.state.filter)
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-        else {
-          this.setState({
-            error: '他のユーザーが既にそのメールアドレスを使用しています。',
-          })
-        }
-      }
-    })
-  }
-
-  passwordModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      passwordModal: true
-    })
-  }
-
-  changePassword = e => {
-    e.preventDefault()
-    const {userid} = this.state
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'id': userid})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/changeuserpassword`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({passwordModal: false})
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-      }
-    })
-  }
-
-
-  deleteModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      deleteModal: true
-    })
-  }
-
-  deleteUser = e=> {
-    e.preventDefault()
-    const {userid} = this.state
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'id': userid})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/deleteuser`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({deleteModal: false})
-      this.getuserData(this.state.filter)
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-      }
-    })
-  }
-
-  render() {
-    const {
-      userdata,
-      totalRecords,
-      SelectedUserids,
-      language,
-      pageCount,
-      alertContent,
-      alertTitle,
-      Alertmodal,
-      emailModal,
-      userid,
-      newEmail,
-      newEmailConfirm,
-      error,
-      passwordModal,
-      deleteModal
-    } = this.state;
+ render() {
+   const {userdata, totalRecords, SelectedUserids,  language, pageCount, alertContent, alertTitle, Alertmodal} = this.state;
    let pageSize = this.state.filter.PageSize;
    let PageNumber = this.state.filter.PageNumber;
    var Selectedids = SelectedUserids[PageNumber-1] ? SelectedUserids[PageNumber-1] : [];
-   console.log(userid)
+   console.log(totalRecords)
    return(
       <Page
         className="root"
@@ -567,24 +425,6 @@ class UserView extends Component {
                                   >
                                    {eval(language).detail}
                                   </Button>
-                                  <Button
-                                    className='btn btn-primary'
-                                    onClick={()=>this.emailModalOpen(user.pk)}
-                                  >
-                                    メールア変更
-                                  </Button>
-                                  <Button
-                                    className='btn btn-primary'
-                                    onClick={()=>this.passwordModalOpen(user.pk)}
-                                  >
-                                    パスワード変更
-                                  </Button>
-                                  <Button
-                                    className='btn btn-delete'
-                                    onClick={()=>this.deleteModalOpen(user.pk)}
-                                  >
-                                    削除
-                                  </Button>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -610,140 +450,26 @@ class UserView extends Component {
               </Box>
           </div>
           <Dialog
-            className="alert-modal"
-            open={Alertmodal}
-            TransitionComponent={Transitionalert}
-            keepMounted
-            onClose={this.handleCloseAlertModal}
-            aria-labelledby="alert-dialog-slide-title"
-            aria-describedby="alert-dialog-slide-description"
-          >
-            <DialogTitle id="alert-dialog-slide-title" style={{textAlign:"center"}}>{alertTitle}</DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-slide-description">
-                {alertContent}
-              </DialogContentText>
-              <div className="search-btn">
-                <Button onClick={this.handleCloseAlertModal} className="btn btn-search">
-                  {eval(language).ok}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <Dialog
-            open={emailModal}
-            onClose={(e)=>(this.setState({emailModal: false, newEmail: '', newEmailConfirm: '', error: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-                <h2>メール変更</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <label>新しいメール</label>
-                        </TableCell>
-                        <TableCell>
-                          <input type="email" value={newEmail} onChange={(e)=>this.setState({newEmail: e.target.value, error: ''})} />
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <label>新しいメール確認</label>
-                        </TableCell>
-                        <TableCell>
-                          <input type="email" value={newEmailConfirm} onChange={(e)=>this.setState({newEmailConfirm: e.target.value, error: ''})} />
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.changeEmail}>メール変更</button>
-                <button onClick={()=>(this.setState({emailModal: false, newEmail: '', newEmailConfirm: '', error: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
-          <Dialog
-            open={passwordModal}
-            onClose={(e)=>(this.setState({passwordModal: false, error: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-                <h2>パスワード変更</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <h3>このユーザーのパスワードを本当に変更しますか？</h3>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.changePassword}>パスワード変更</button>
-                <button onClick={()=>(this.setState({passwordModal: false,  error: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
-          <Dialog
-            open={deleteModal}
-            onClose={(e)=>(this.setState({deleteModal: false, error: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-                <h2>ユーザー削除</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <h3>このユーザーを本当に削除してもよろしいですか？</h3>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.deleteUser}>ユーザー削除</button>
-                <button onClick={()=>(this.setState({deleteModal: false,  error: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
+          className="alert-modal"
+          open={Alertmodal}
+          TransitionComponent={Transitionalert}
+          keepMounted
+          onClose={this.handleCloseAlertModal}
+          aria-labelledby="alert-dialog-slide-title"
+          aria-describedby="alert-dialog-slide-description"
+       >
+        <DialogTitle id="alert-dialog-slide-title" style={{textAlign:"center"}}>{alertTitle}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            {alertContent}
+          </DialogContentText>
+          <div className="search-btn">
+            <Button onClick={this.handleCloseAlertModal} className="btn btn-search">
+              {eval(language).ok}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
         <Dialog
             className="spin-modal"
             open={this.state.spin}      

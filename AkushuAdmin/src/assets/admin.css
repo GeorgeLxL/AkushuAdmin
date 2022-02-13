@@ -1,19 +1,8 @@
-.makeStyles-wrapper-2 {
-    height: 100vh;
-}
-.makeStyles-contentContainer-3 {
-    height: 100%;
-}
 .root{
     background-color:#F6F6F7;
     min-height: 100vh;
     padding-bottom:24px;
     padding-top: 24px;
-}
-@media (max-width: 600px) {
-    .makeStyles-wrapper-2 {
-        padding-top: 56px !important;
-    }
 }
 .pagination{
     position: relative;
@@ -165,16 +154,8 @@
     min-width: 90px !important;
     color: white !important;
     margin-right: 10px !important;
-}
-.btn-primary {
-    color: white !important;
-    background-color: #007AFF !important;
-    margin-right: 10px !important;
-}
-.btn-delete {
-    color: white !important;
-    background-color: #D61519 !important;
-    margin-right: 10px !important;
+    margin-left: 10px !important;
+    margin-bottom: 10px !important;
 }
 
 .btn-addwork{
@@ -394,11 +375,10 @@
 
   .certificate_image{
     width: 120px !important;
-    height: 120px !important;
+    height: 80px !important;
     border-radius: 0% !important;
     display: inline-flex !important;
     margin-right: 10px;
-    object-fit: cover;
   }
 
   .avatar{
@@ -913,13 +893,14 @@ right: -10px;
     background-color: white;
     box-shadow: 0 0 5px rgba(0, 0, 0, .5);
     padding: 10px;
-    height: 60vh;
+    height: 300px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
 }
 .chat-card-content {
     overflow-y: scroll;
+    padding-bottom: 10px;
     display: flex;
     flex-direction: column-reverse;
 }
@@ -934,16 +915,10 @@ right: -10px;
     justify-content: flex-start;
     align-items: flex-start;
     margin-top: 10px;
-    padding-left: 40px;
+   
 }
-.chat-inbox > img {
+.chat-inbox img {
     width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 50%;
-}
-.chat-inbox div {
-    max-width: 70%;
 }
 .chat-inbox p {
     padding: 10px 15px;
@@ -951,15 +926,8 @@ right: -10px;
     font-size: 14px;
     border-radius: 0 15px 15px;
     margin-left: 10px;
+    max-width: 180px;
     overflow: hidden;
-}
-.chat-inbox div img {
-    width: 100%;
-    max-width: 400px;
-    margin-left: 10px;
-}
-.chat-inbox.first {
-    padding-left: 0;
 }
 .chat-outbox {
     display: flex;
@@ -967,20 +935,14 @@ right: -10px;
     align-items: flex-end;
     margin-top: 10px;
 }
-.chat-outbox div {
-    max-width: 70%;
-}
 .chat-outbox p {
     padding: 10px 15px;
     background-color: #007AFF;
     color: white;
     font-size: 14px;
     border-radius: 15px 15px 0 15px;
+    max-width: 180px;
     overflow: hidden;
-}
-.chat-outbox div img {
-    width: 100%;
-    max-width: 400px;
 }
 .chat-unread {
     display: flex;
@@ -1020,112 +982,4 @@ right: -10px;
 .chat-input button img {
     width: 20px;
     filter: hue-rotate(.25turn);
-}
-.chat-photo {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 10px;
-}
-.chat-photo button {
-    width: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-}
-.chat-photo button img {
-    filter: hue-rotate(.25turn);
-}
-.notification-add {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 20px;
-}
-.notification-add button {
-    padding: .7em 1.5em;
-    background-color: #007AFF;
-    color: white;
-    font-weight: bold;
-    border-radius: 5px;
-}
-.modal-body {
-    width: 600px;
-    max-width: 100%;
-    padding: 20px;
-    background-color: white;
-    border-radius: 10px;
-}
-.modal-body h2 {
-    text-align: center;
-    font-size: 1.5em;
-    margin-bottom: 1.5em;
-}
-.modal-body h3 {
-    text-align: center;
-}
-.modal-notification-user {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-.modal-notification-user>div {
-    margin-right: 2em;
-}
-.modal-notification-user label {
-    padding-left: .5em;
-}
-.modal-notification-content {
-    padding: 1em 0;
-}
-.modal-notification-content textarea {
-    width: 100%;
-    border-radius: 5px;
-    padding: .3em;
-    border: 1px solid #5c5f62;
-    vertical-align: middle;
-}
-.modal-link {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.modal-link button {
-    padding: .5em 1em;
-    border-radius: 5px;
-    color: white;
-    font-weight: bold;
-    width: 48%;
-}
-.modal-link button:nth-child(1) {
-    background-color: #007AFF;
-}
-.modal-link button:nth-child(2) {
-    background-color: #D61519;
-}
-.modal-img {
-    text-align: center;
-    padding-bottom: 20px;
-}
-.modal-img img {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    margin: auto;
-    border-radius: 50%;
-}
-.modal-email-main table {
-    margin-bottom: 30px;
-}
-.modal-email-main input {
-    border: 1px solid #5c5f62;
-    width: 100%;
-}
-.modal-error {
-    margin-bottom: 30px;
-    color: #D61519;
-    text-align: center;
-}
-.prequestion h3 {
-    text-align: center;
-}
-.prequestion td:first-child {
-    width: 400px;
 }

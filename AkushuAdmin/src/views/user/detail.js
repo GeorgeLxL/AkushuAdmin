@@ -24,7 +24,7 @@ const en = {
   UserDetail:"User Detail",
   userid:"User ID",
   name:"Name",
-  name_furigana:"Furigana Name",
+  name_freegana:"Furigana Name",
   maiden_name:"Maiden name",
   gender:"Gender",
   female:"Female",
@@ -53,7 +53,7 @@ const jp ={
   UserDetail:"ユーザーの詳細",
   userid:"ユーザーID",
   name:"お名前",
-  name_furigana:"お名前 ふりがな",
+  name_freegana:"お名前 ふりがな",
   maiden_name:"旧姓",
   gender:"性別",
   female:"女性",
@@ -118,17 +118,6 @@ class UserDetail extends Component {
         pointhistory:[],
         messages:[],
         message:"",
-        avatar: '',
-        notifications: [],
-        createNotofication:false,
-        notificaion_user: 1,
-        notification_content: '',
-        prequestion: false,
-        business: false,
-        realEstate: false,
-        unoccupied: false,
-        financial: false,
-        prequestion_content: '',
     }; 
  
   handleGoback = (event) =>{
@@ -189,7 +178,8 @@ class UserDetail extends Component {
     };
     axios(config)
     .then((response) => {
-      var pointhistory = JSON.parse(response.data.pointhistory);
+      var pointhistory = JSON.parse(response.data.pointhistroy);
+      console.log(pointhistory)
       this.setState({
         pointhistory:pointhistory
       });
@@ -208,17 +198,11 @@ class UserDetail extends Component {
   handleChange = (event,newValue)=>{
     clearInterval(this.interval);
     this.setState({
-        value: newValue,
+        value:newValue,
     })
     if(newValue==2)
     {
       this.getMessages();
-    }
-    if (newValue==3) {
-      this.getNotification();
-    }
-    if (newValue==4) {
-      this.getPreQuestion();
     }
   }
 
@@ -242,9 +226,9 @@ class UserDetail extends Component {
     axios(config)
     .then((response) => {
         this.setState({
-            messages:response.data.messages,
-            avatar: response.data.avatar
+            messages:JSON.parse(response.data.messages),
         });
+        console.log(JSON.parse(response.data.messages))
     })
     .catch((error)=>{
         this.setState({
@@ -272,8 +256,7 @@ class UserDetail extends Component {
       axios(config)
       .then((response) => {
           this.setState({
-              messages: response.data.messages,
-              avatar: response.data.avatar
+              messages:JSON.parse(response.data.messages),
           });
       })
       .catch((error)=>{
@@ -288,14 +271,14 @@ class UserDetail extends Component {
           }
       })
     },5000)
-  }
+}
 
-  componentWillUnmount() {
-    clearInterval(this.interval)
-  }
+componentWillUnmount() {
+  clearInterval(this.interval)
+}
 
 
-  handleSubmit = e =>{
+handleSubmit = e =>{
     e.preventDefault();
     const {message} = this.state;
     var userData = JSON.parse(localStorage.userData);
@@ -303,18 +286,15 @@ class UserDetail extends Component {
     if(message==""){
         return
     }
-    var fd = new FormData();
-    fd.append("message", message)
-    fd.append("user", this.state.userid)
-    fd.append("photo", null)
+    var data = JSON.stringify({"message":message, user:this.state.userid});
     var config = {
       method: 'post',
       url: `${baseurl}/api/sendmessage`,
-      headers: {
+      headers: { 
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + token,
       },
-      data : fd
+      data : data
     };
     axios(config)
     .then((response)=>{
@@ -327,170 +307,15 @@ class UserDetail extends Component {
             window.location.assign('/');
         }
     });
-  }
+}
 
-  sendPhotoMessage = e => {
-    var photo = e.target.files[0];
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token
-    var fd = new FormData()
-    fd.append('message', '')
-    fd.append('photo', photo)
-    fd.append('user', this.state.userid)
-    var config = {
-        method: 'post',
-        url: `${baseurl}/api/sendmessage`,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token,
-        },
-        data: fd
-    };
-    axios(config)
-    .then((response)=>{
-        this.setState({message: ""});
-        this.getMessages();
-    })
-    .catch((error)=>{
-        if(error.response.status===401){
-            localStorage.removeItem("userData");
-            window.location.assign('/');
-        }
-    });
-  }
-
-  getNotification(){
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token
-    var data = JSON.stringify({id: this.state.userid})
-    var config = {
-        method: 'post',
-        url: `${baseurl}/api/getnotifications`,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token,
-        },
-        data : data,
-    };
-    axios(config)
-    .then((response) => {
-        this.setState({
-            notifications:JSON.parse(response.data.notifications),
-        });
-
-    })
-    .catch((error)=>{
-        if (error.response) {
-            if(error.response.status===401){
-                localStorage.removeItem("userData");
-                window.location.assign('/');
-            }
-        }
-    })
-  }
-
-  notificationUserSelect(e) {
-    if (e.target.checked) this.setState({notificaion_user: parseInt(e.target.value)})
-  }
-
-  postNotification = e => {
-    e.preventDefault();
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token
-    const {notification_content, notificaion_user, userid} = this.state
-    if (notification_content == ""){
-      return
-    }
-    var data
-    if (notificaion_user == 1) data = JSON.stringify({"content": notification_content, "user": userid, "all": false})
-    else data = JSON.stringify({"content": notification_content, "all": true})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/postnotification`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    };
-    axios(config)
-    .then((res)=>{
-      this.setState({notification_content: "", createNotofication: false});
-        this.getNotification();
-    })
-    .catch((error)=>{
-      if(error.response.status===401){
-        localStorage.removeItem("userData");
-        window.location.assign('/');
-      }
-    })
-  }
-
-  getPreQuestion() {
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token
-    var data = JSON.stringify({id: this.state.userid})
-    var config = {
-        method: 'post',
-        url: `${baseurl}/api/getprequestion`,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token,
-        },
-        data : data,
-    };
-    axios(config)
-    .then((response) => {
-      if (response.data.prequestion) {
-        var prequestion_main = JSON.parse(response.data.prequestion)[0]
-        console.log(prequestion_main)
-        this.setState({
-          prequestion: true,
-          business: prequestion_main.fields.business,
-          realEstate: prequestion_main.fields.realEstate,
-          unoccupied: prequestion_main.fields.unoccupied,
-          financial: prequestion_main.fields.financial,
-          prequestion_content: prequestion_main.fields.content
-        })
-      }
-      else {
-        this.setState({
-          prequestion: false
-        })
-      }
-    })
-    .catch((error)=>{
-        if (error.response) {
-            if(error.response.status===401){
-                localStorage.removeItem("userData");
-                window.location.assign('/');
-            }
-        }
-    })
-  }
-
-  render() {
-    const {userdata,
-      language,
-      userid,
-      value,
-      pointhistory,
-      messages,
-      avatar,
-      notifications,
-      notification_content,
-      prequestion,
-      business,
-      realEstate,
-      unoccupied,
-      financial,
-      prequestion_content
-    } = this.state;
-      return(
-        <Page
-          className="root"
-          title="Akushu|UserDetail"
-        >
+ render() {
+   const { userdata,language, userid, value, pointhistory} = this.state;
+    return(
+      <Page
+        className="root"
+        title="Akushu|UserDetail"
+      >
         <Container maxWidth={false}>
             <Box
                 display="flex"
@@ -509,9 +334,6 @@ class UserDetail extends Component {
                             <Tab style={{color:"black", fontSize:"18px", fontWeight:"600"}} label="ユーザー" {...a11yProps(0)} />
                             <Tab style={{color:"black",fontSize:"18px", fontWeight:"600"}} label="ポイント履歴" {...a11yProps(1)} />
                             <Tab style={{color:"black",fontSize:"18px", fontWeight:"600"}} label="メッセージ履歴" {...a11yProps(2)} />
-                            <Tab style={{color:"black",fontSize:"18px", fontWeight:"600"}} label="通知履歴" {...a11yProps(3)} />
-                            <Tab style={{color:"black",fontSize:"18px", fontWeight:"600"}} label="アンケート" {...a11yProps(4)} />
-                            アンケート
                         </Tabs>
                     </AppBar>
                     <TabPanel value={value} index={0}>
@@ -529,18 +351,17 @@ class UserDetail extends Component {
                               </TableRow>
                               <TableRow>
                                   <TableCell className="filedname">
-                                    {eval(language).name}
+                                    {eval(language).artistname}
                                   </TableCell>
-                                  <TableCell>
-                                    {`${userdata.name1?userdata.name1:""} ${userdata.name2?userdata.name2:""}`}
-                                  </TableCell>
-                              </TableRow>
-                              <TableRow>
                                   <TableCell className="filedname">
-                                    {eval(language).name_furigana}
+                                    {eval(language).name}
+                                    <br/>
+                                    {eval(language).name_freegana}
                                     <br/>
                                   </TableCell>
                                   <TableCell  colSpan="3">
+                                    {`${userdata.name1?userdata.name1:""} ${userdata.name2?userdata.name2:""}`}
+                                    <br/>  
                                     {`${userdata.kana1?userdata.kana1:""} ${userdata.kana2?userdata.kana2:""}`}
                                     <br/> 
                                   </TableCell>                                    
@@ -621,7 +442,7 @@ class UserDetail extends Component {
                                   </Avatar>
                                   </TableCell>                                    
                               </TableRow>
-                              {/* <TableRow>
+                              <TableRow>
                                   <TableCell className="filedname">
                                     {eval(language).bank_account}
                                   </TableCell>
@@ -647,7 +468,7 @@ class UserDetail extends Component {
                                   <br/>
                                   {userdata.accountName}
                                   </TableCell>
-                              </TableRow> */}
+                              </TableRow>
                           </TableBody>
                           </Table>
                       </Box>
@@ -671,10 +492,10 @@ class UserDetail extends Component {
                                   key={history.pk}
                                 >
                                   <TableCell>
-                                    {history.fields.content}
+                                  {history.fields.content}
                                   </TableCell>
                                   <TableCell>
-                                    {(new Date(history.fields.created_at)).getFullYear().toString() + '年' + ((new Date(history.fields.created_at)).getMonth()+1).toString() + '月' + (new Date(history.fields.created_at)).getDate().toString() + '日'}
+                                    {history.fields.created_at}
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -686,31 +507,13 @@ class UserDetail extends Component {
                           <div className="chat-card">
                               <div className="chat-card-content">
                                   <div className="chat-card-content1">
-                                      {messages.map(item=>(
-                                        <div key={item.pk} className={`${item.send ? "chat-outbox" : "chat-inbox"} ${item.first? "first":""}`}>
-                                          
-                                          {item.send ? "": item.first? <img src={avatar ? `${baseurl}/media/${avatar}`:"/assets/image/avatar.svg"} /> : ""}
-                                          <div>
-                                            {
-                                              item.content != ''?
-                                              <p>{item.content}</p>
-                                              :
-                                              <></>
-                                            }
-                                            {
-                                              item.photo?
-                                              <img src={`${baseurl}/media/${item.photo}`} />
-                                              :
-                                              <></>
-                                            }
+                                      {this.state.messages.map(item=>(
+                                          <div key={item.pk} className={item.fields.send ? "chat-outbox" : "chat-inbox"}>
+                                              {item.fields.send ? <img src={userdata.avatar ? `${baseurl}/media/${userdata.avatar}`:""} /> : ""}
+                                              <p>{item.fields.content}</p>
                                           </div>
-                                        </div>
                                       ))}
                                   </div>
-                              </div>
-                              <div className="chat-photo">
-                                  <input type="file" onChange={this.sendPhotoMessage} ref={(ref) => this.upload = ref} hidden accept="image/*" />
-                                  <button onClick={(e) => this.upload.click()} ><img src="/assets/image/top-foot-link4.png" /></button>
                               </div>
                               <form onSubmit={this.handleSubmit}>
                                   <div className="chat-input">
@@ -721,123 +524,10 @@ class UserDetail extends Component {
                           </div>
                       </div>
                     </TabPanel>
-                    <TabPanel value={value} index={3}>
-                      <Table className="result_table">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>
-                              コンテンツ
-                            </TableCell>
-                            <TableCell>
-                              年月日
-                            </TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {notifications.map((history) => (
-                            <TableRow
-                              hover
-                              key={history.pk}
-                            >
-                              <TableCell>
-                                {history.fields.content}
-                              </TableCell>
-                              <TableCell>
-                                {(new Date(history.fields.created_at)).getFullYear().toString() + '年' + ((new Date(history.fields.created_at)).getMonth()+1).toString() + '月' + (new Date(history.fields.created_at)).getDate().toString() + '日'}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                      <div className='notification-add'>
-                        <button onClick={()=>this.setState({createNotofication: true})}>通知投稿</button>
-                      </div>
-                    </TabPanel>
-                    <TabPanel value={value} index={4}>
-                      <div className='prequestion'>
-                        {
-                          prequestion?
-                            <Table>
-                              <TableBody>
-                                <TableRow>
-                                  <TableCell>
-                                    ビジネスマッチングに興味はありますか？
-                                  </TableCell>
-                                  <TableCell>
-                                    {business?'はい':'いいえ'}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>
-                                    不動産情報に興味はありますか？
-                                  </TableCell>
-                                  <TableCell>
-                                    {realEstate?'はい':'いいえ'}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>
-                                    金融情報（投資案件）に興味はありますか？
-                                  </TableCell>
-                                  <TableCell>
-                                    {unoccupied?'はい':'いいえ'}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>
-                                    その他興味のあること
-                                  </TableCell>
-                                  <TableCell>
-                                    {financial?'はい':'いいえ'}
-                                  </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                  <TableCell>
-                                    ビジネスマッチングに興味はありますか？
-                                  </TableCell>
-                                  <TableCell>
-                                    <p dangerouslySetInnerHTML={{__html: prequestion_content.replace(/(?:\r\n|\r|\n)/g, '<br />')}}></p>
-                                  </TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
-                            :
-                            <h3>このユーザーはまだアンケートに回答していません。</h3>
-                        }
-                      </div>
-                    </TabPanel>
                   </CardContent>
                 </Card>
             </Box>
         </Container>
-        <Dialog
-          className=""
-          open={this.state.createNotofication}
-          onClick={()=>this.setState({createNotofication: false})}
-        >
-          <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-            <div className='modal-notification'>
-              <h2>通知投稿</h2>
-              <div className='modal-notification-user'>
-                <div>
-                  <input type="radio" value="1" name="user" id="notification_current" defaultChecked onClick={(e)=>this.notificationUserSelect(e)} />
-                  <label htmlFor='notification_current'>現在ユーザー</label>
-                </div>
-                <div>
-                  <input type="radio" value="2" name="user" id="notification_all" onClick={(e)=>this.notificationUserSelect(e)} />
-                  <label htmlFor='notification_all'>すべてユーザー</label>
-                </div>
-              </div>
-              <div className='modal-notification-content'>
-                <textarea rows={5} value={notification_content} onChange={(e)=>this.setState({notification_content: e.target.value})}></textarea>
-              </div>
-            </div>
-            <div className='modal-link'>
-              <button onClick={this.postNotification}>投稿</button>
-              <button onClick={()=>this.setState({createNotofication: false})}>取消</button>
-            </div>
-          </div>
-        </Dialog>
         <Dialog
             className="spin-modal"
             open={this.state.spin}      
