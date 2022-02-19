@@ -121,13 +121,13 @@ const NavBar = ({ onMobileClose, openMobile }) => {
               </Button>
             </ListItem>
 
-            <ListItem
+            {/* <ListItem
               className="item"
             >
               <Button
                 className="nav-button"
                 component={RouterLink}
-                to="/admin/account"
+                to="/admin/point"
               >
                   <svg id="networking" width="35" height="35" viewBox="0 0 35 35">
                     <path id="Path_21" data-name="Path 21" d="M32.448,0H2.552A2.555,2.555,0,0,0,0,2.552V6.2A2.555,2.555,0,0,0,2.552,8.75h29.9A2.555,2.555,0,0,0,35,6.2V2.552A2.555,2.555,0,0,0,32.448,0Z" />
@@ -141,7 +141,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
                 {eval(language).accountlabel}
                 </span>
               </Button>
-            </ListItem>
+            </ListItem> */}
         </List>
       </Box>
       <Box flexGrow={1} />

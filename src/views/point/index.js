@@ -107,7 +107,7 @@ const jp={
   error:"失敗", 
 }
 
-class UserView extends Component {
+class PointView extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -133,11 +133,6 @@ class UserView extends Component {
       error: '',
       passwordModal: false,
       deleteModal: false,
-      addPointModal: false,
-      reducePointModal: false,
-      totalPoint: '',
-      point: '',
-      value: '',
     };
   }
 
@@ -422,183 +417,6 @@ class UserView extends Component {
     })
   }
 
-  
-
-  addPointModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      totalPoint: this.state.userdata.filter(user=>(user.pk == pk))[0]?.point? this.state.userdata.filter(user=>(user.pk == pk))[0]?.point.toString(): '0',
-      addPointModal: true
-    })
-  }
-
-  reducePointModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      totalPoint: this.state.userdata.filter(user=>(user.pk == pk))[0]?.point? this.state.userdata.filter(user=>(user.pk == pk))[0]?.point.toString(): '0',
-      reducePointModal: true
-    })
-  }
-
-  addPoint = e => {
-    e.preventDefault()
-    const {userid, point} = this.state
-    if (point == '') {
-      this.setState({
-        error: '追加するポイントを入力します。',
-      })
-      return;
-    }
-    var point1 = parseFloat(point.replace(/,/g, ''))
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'id': userid, 'point': point1})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/addpoint`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({addPointModal: false, totalPoint: '', point: '', error: '', value: ''})
-      this.getuserData(this.state.filter)
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-      }
-    })
-  }
-
-  reducePoint = e => {
-    e.preventDefault()
-    const {userid, point} = this.state
-    console.log(userid, point)
-    if (point == '') {
-      this.setState({
-        error: '消費するポイントを入力します。',
-      })
-      return;
-    }
-    var point1 = parseFloat(point.replace(/,/g, ''))
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'id': userid, 'point': point1})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/reducepoint`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({reducePointModal: false, totalPoint: '', point: '', error: '', value: ''})
-      this.getuserData(this.state.filter)
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-      }
-    })
-  }
-
-  handleKeyPress = e => {
-    if (e.keyCode == 48 || e.keyCode == 96) {
-      this.setState({value: this.state.value.toString() + '0'})
-    }
-    if (e.keyCode == 49 || e.keyCode == 97) {
-      this.setState({value: this.state.value.toString() + '1'})
-    }
-    if (e.keyCode == 50 || e.keyCode == 98) {
-      this.setState({value: this.state.value.toString() + '2'})
-    }
-    if (e.keyCode == 51 || e.keyCode == 99) {
-      this.setState({value: this.state.value.toString() + '3'})
-    }
-    if (e.keyCode == 52 || e.keyCode == 100) {
-      this.setState({value: this.state.value.toString() + '4'})
-    }
-    if (e.keyCode == 53 || e.keyCode == 101) {
-      this.setState({value: this.state.value.toString() + '5'})
-    }
-    if (e.keyCode == 54 || e.keyCode == 102) {
-      this.setState({value: this.state.value.toString() + '6'})
-    }
-    if (e.keyCode == 55 || e.keyCode == 103) {
-      this.setState({value: this.state.value.toString() + '7'})
-    }
-    if (e.keyCode == 56 || e.keyCode == 104) {
-      this.setState({value: this.state.value.toString() + '8'})
-    }
-    if (e.keyCode == 57 || e.keyCode == 105) {
-      this.setState({value: this.state.value.toString() + '9'})
-    }
-    if (e.keyCode == 8) {
-        if (this.state.value != '') {
-            this.setState({value: this.state.value.slice(0, -1)});
-        }
-    }
-    if (parseFloat(this.state.value) > parseFloat(this.state.totalPoint)) this.setState({value: ((this.state.totalPoint).toString())})
-  }
-
-  
-  handleAddKeyPress = e => {
-    if (e.keyCode == 48 || e.keyCode == 96) {
-      this.setState({value: this.state.value.toString() + '0'})
-    }
-    if (e.keyCode == 49 || e.keyCode == 97) {
-      this.setState({value: this.state.value.toString() + '1'})
-    }
-    if (e.keyCode == 50 || e.keyCode == 98) {
-      this.setState({value: this.state.value.toString() + '2'})
-    }
-    if (e.keyCode == 51 || e.keyCode == 99) {
-      this.setState({value: this.state.value.toString() + '3'})
-    }
-    if (e.keyCode == 52 || e.keyCode == 100) {
-      this.setState({value: this.state.value.toString() + '4'})
-    }
-    if (e.keyCode == 53 || e.keyCode == 101) {
-      this.setState({value: this.state.value.toString() + '5'})
-    }
-    if (e.keyCode == 54 || e.keyCode == 102) {
-      this.setState({value: this.state.value.toString() + '6'})
-    }
-    if (e.keyCode == 55 || e.keyCode == 103) {
-      this.setState({value: this.state.value.toString() + '7'})
-    }
-    if (e.keyCode == 56 || e.keyCode == 104) {
-      this.setState({value: this.state.value.toString() + '8'})
-    }
-    if (e.keyCode == 57 || e.keyCode == 105) {
-      this.setState({value: this.state.value.toString() + '9'})
-    }
-    if (e.keyCode == 8) {
-        if (this.state.value != '') {
-            this.setState({value: this.state.value.slice(0, -1)});
-        }
-    }
-  }
-
-  handlChangePoint =  e =>{
-    this.setState({
-        point: this.state.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    });
-  }
-
   render() {
     const {
       userdata,
@@ -615,15 +433,12 @@ class UserView extends Component {
       newEmailConfirm,
       error,
       passwordModal,
-      deleteModal,
-      addPointModal,
-      reducePointModal,
-      totalPoint,
-      point
+      deleteModal
     } = this.state;
    let pageSize = this.state.filter.PageSize;
    let PageNumber = this.state.filter.PageNumber;
    var Selectedids = SelectedUserids[PageNumber-1] ? SelectedUserids[PageNumber-1] : [];
+   console.log(userid)
    return(
       <Page
         className="root"
@@ -745,26 +560,12 @@ class UserView extends Component {
                                 <TableCell>
                                 {user.point}
                                 </TableCell>
-                                <TableCell
-                                  style={{width: '680px'}}
-                                >
-                                  <Button
+                                <TableCell>
+                                  {/* <Button
                                     className="btn btn-detail"
                                     onClick={e=>{window.location.assign(`user/detail/${user.pk}`)}}
                                   >
                                    {eval(language).detail}
-                                  </Button>
-                                  <Button
-                                    className='btn btn-primary'
-                                    onClick={()=>this.addPointModalOpen(user.pk)}
-                                  >
-                                    ポイント追加
-                                  </Button>
-                                  <Button
-                                    className='btn btn-delete'
-                                    onClick={()=>this.reducePointModalOpen(user.pk)}
-                                  >
-                                    ポイント消費
                                   </Button>
                                   <Button
                                     className='btn btn-primary'
@@ -783,7 +584,7 @@ class UserView extends Component {
                                     onClick={()=>this.deleteModalOpen(user.pk)}
                                   >
                                     削除
-                                  </Button>
+                                  </Button> */}
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -943,88 +744,6 @@ class UserView extends Component {
               </div>
             </div>
           </Dialog>
-          <Dialog
-            open={addPointModal}
-            onClose= {(e)=>(this.setState({addPointModal: false, totalPoint: '', point: '', error: '', value: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-              <h2>ポイント追加</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <h3>現在の保有ポイント : {totalPoint}</h3>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <label>ポイント</label>
-                        </TableCell>
-                        <TableCell>
-                          <input type="text" value={point == 'NaN'? '': point} onChange={this.handlChangePoint} onKeyDown={this.handleAddKeyPress} />
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.addPoint}>ポイント追加</button>
-                <button onClick={()=>(this.setState({addPointModal: false,  error: '', totalPoint: '', point: '', value: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
-          <Dialog
-            open={reducePointModal}
-            onClose= {(e)=>(this.setState({reducePointModal: false, totalPoint: '', point: '', error: '', value: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-              <h2>ポイント消費</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <h3>現在の保有ポイント : {totalPoint}</h3>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <label>ポイント</label>
-                        </TableCell>
-                        <TableCell>
-                          <input type="text" value={point == 'NaN'? '': point} onChange={this.handlChangePoint} onKeyDown={this.handleKeyPress} />
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.reducePoint}>ポイント消費</button>
-                <button onClick={()=>(this.setState({reducePointModal: false,  error: '', totalPoint: '', point: '', value: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
         <Dialog
             className="spin-modal"
             open={this.state.spin}      
@@ -1038,4 +757,4 @@ class UserView extends Component {
     );
  }
 };
-export default UserView;
+export default PointView;

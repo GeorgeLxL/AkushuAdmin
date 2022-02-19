@@ -8,6 +8,7 @@ import UserDetail from './views/user/detail';
 import LoginView from 'src/views/auth/LoginView';
 import NotFoundView from 'src/views/errors/NotFoundView';
 import {getCurrentUser} from './assets/login';
+import PointView from './views/point';
 
 const userData = getCurrentUser() || null;
 var progress = localStorage.getItem("progress") || null;
@@ -19,7 +20,8 @@ const routes = [
       { path: 'user', element: userData ? <UserView />:<Navigate to="/login" /> },
       { path: 'estimates', element: userData ? <EstimatesView />:<Navigate to="/login" /> },
       { path: 'money', element: userData ? <MoneyView />:<Navigate to="/login" /> },
-      { path: 'user/detail/:id', element: userData ? <UserDetail /> :<Navigate to="/login" /> }, 
+      { path: 'user/detail/:id', element: userData ? <UserDetail /> :<Navigate to="/login" /> },
+      { path: 'point', element: userData ? <PointView /> :<Navigate to="/login" /> },
       { path: '*', element: <Navigate to="/404" /> }
     ]
   },
