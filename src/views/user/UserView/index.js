@@ -137,7 +137,6 @@ class UserView extends Component {
       reducePointModal: false,
       totalPoint: '',
       point: '',
-      value: '',
     };
   }
 
@@ -464,7 +463,7 @@ class UserView extends Component {
     }
     axios(config)
     .then((response)=>{
-      this.setState({addPointModal: false, totalPoint: '', point: '', error: '', value: ''})
+      this.setState({addPointModal: false, totalPoint: '', point: '', error: '',})
       this.getuserData(this.state.filter)
     })
     .catch((error)=>{
@@ -502,7 +501,7 @@ class UserView extends Component {
     }
     axios(config)
     .then((response)=>{
-      this.setState({reducePointModal: false, totalPoint: '', point: '', error: '', value: ''})
+      this.setState({reducePointModal: false, totalPoint: '', point: '', error: '',})
       this.getuserData(this.state.filter)
     })
     .catch((error)=>{
@@ -515,88 +514,17 @@ class UserView extends Component {
     })
   }
 
-  handleKeyPress = e => {
-    if (e.keyCode == 48 || e.keyCode == 96) {
-      this.setState({value: this.state.value.toString() + '0'})
-    }
-    if (e.keyCode == 49 || e.keyCode == 97) {
-      this.setState({value: this.state.value.toString() + '1'})
-    }
-    if (e.keyCode == 50 || e.keyCode == 98) {
-      this.setState({value: this.state.value.toString() + '2'})
-    }
-    if (e.keyCode == 51 || e.keyCode == 99) {
-      this.setState({value: this.state.value.toString() + '3'})
-    }
-    if (e.keyCode == 52 || e.keyCode == 100) {
-      this.setState({value: this.state.value.toString() + '4'})
-    }
-    if (e.keyCode == 53 || e.keyCode == 101) {
-      this.setState({value: this.state.value.toString() + '5'})
-    }
-    if (e.keyCode == 54 || e.keyCode == 102) {
-      this.setState({value: this.state.value.toString() + '6'})
-    }
-    if (e.keyCode == 55 || e.keyCode == 103) {
-      this.setState({value: this.state.value.toString() + '7'})
-    }
-    if (e.keyCode == 56 || e.keyCode == 104) {
-      this.setState({value: this.state.value.toString() + '8'})
-    }
-    if (e.keyCode == 57 || e.keyCode == 105) {
-      this.setState({value: this.state.value.toString() + '9'})
-    }
-    if (e.keyCode == 8) {
-        if (this.state.value != '') {
-            this.setState({value: this.state.value.slice(0, -1)});
-        }
-    }
-    if (parseFloat(this.state.value) > parseFloat(this.state.totalPoint)) this.setState({value: ((this.state.totalPoint).toString())})
-  }
-
-  
-  handleAddKeyPress = e => {
-    if (e.keyCode == 48 || e.keyCode == 96) {
-      this.setState({value: this.state.value.toString() + '0'})
-    }
-    if (e.keyCode == 49 || e.keyCode == 97) {
-      this.setState({value: this.state.value.toString() + '1'})
-    }
-    if (e.keyCode == 50 || e.keyCode == 98) {
-      this.setState({value: this.state.value.toString() + '2'})
-    }
-    if (e.keyCode == 51 || e.keyCode == 99) {
-      this.setState({value: this.state.value.toString() + '3'})
-    }
-    if (e.keyCode == 52 || e.keyCode == 100) {
-      this.setState({value: this.state.value.toString() + '4'})
-    }
-    if (e.keyCode == 53 || e.keyCode == 101) {
-      this.setState({value: this.state.value.toString() + '5'})
-    }
-    if (e.keyCode == 54 || e.keyCode == 102) {
-      this.setState({value: this.state.value.toString() + '6'})
-    }
-    if (e.keyCode == 55 || e.keyCode == 103) {
-      this.setState({value: this.state.value.toString() + '7'})
-    }
-    if (e.keyCode == 56 || e.keyCode == 104) {
-      this.setState({value: this.state.value.toString() + '8'})
-    }
-    if (e.keyCode == 57 || e.keyCode == 105) {
-      this.setState({value: this.state.value.toString() + '9'})
-    }
-    if (e.keyCode == 8) {
-        if (this.state.value != '') {
-            this.setState({value: this.state.value.slice(0, -1)});
-        }
-    }
-  }
-
   handlChangePoint =  e =>{
     this.setState({
-        point: this.state.value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+        point: (e.target.value.replace(/,/g, "")).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     });
+    if (this.state.reducePointModal) {
+      if (parseInt(e.target.value.replace(/,/g, "")) > parseInt(this.state.totalPoint)) {
+        this.setState({
+          point: this.state.totalPoint.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+      });
+      }
+    }
   }
 
   render() {
@@ -945,7 +873,7 @@ class UserView extends Component {
           </Dialog>
           <Dialog
             open={addPointModal}
-            onClose= {(e)=>(this.setState({addPointModal: false, totalPoint: '', point: '', error: '', value: ''}))}
+            onClose= {(e)=>(this.setState({addPointModal: false, totalPoint: '', point: '', error: '',}))}
           >
             <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
               <div className='modal-email'>
@@ -970,7 +898,7 @@ class UserView extends Component {
                           <label>ポイント</label>
                         </TableCell>
                         <TableCell>
-                          <input type="text" value={point == 'NaN'? '': point} onChange={this.handlChangePoint} onKeyDown={this.handleAddKeyPress} />
+                          <input type="text" value={point == 'NaN'? '': point} onChange={this.handlChangePoint} />
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -980,13 +908,13 @@ class UserView extends Component {
               <p className='modal-error'>{error}</p>
               <div className='modal-link'>
                 <button onClick={this.addPoint}>ポイント追加</button>
-                <button onClick={()=>(this.setState({addPointModal: false,  error: '', totalPoint: '', point: '', value: ''}))}>取消</button>
+                <button onClick={()=>(this.setState({addPointModal: false,  error: '', totalPoint: '', point: '',}))}>取消</button>
               </div>
             </div>
           </Dialog>
           <Dialog
             open={reducePointModal}
-            onClose= {(e)=>(this.setState({reducePointModal: false, totalPoint: '', point: '', error: '', value: ''}))}
+            onClose= {(e)=>(this.setState({reducePointModal: false, totalPoint: '', point: '', error: '',}))}
           >
             <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
               <div className='modal-email'>
@@ -1011,7 +939,7 @@ class UserView extends Component {
                           <label>ポイント</label>
                         </TableCell>
                         <TableCell>
-                          <input type="text" value={point == 'NaN'? '': point} onChange={this.handlChangePoint} onKeyDown={this.handleKeyPress} />
+                          <input type="text" value={point == 'NaN'? '': point} onChange={this.handlChangePoint} />
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -1021,7 +949,7 @@ class UserView extends Component {
               <p className='modal-error'>{error}</p>
               <div className='modal-link'>
                 <button onClick={this.reducePoint}>ポイント消費</button>
-                <button onClick={()=>(this.setState({reducePointModal: false,  error: '', totalPoint: '', point: '', value: ''}))}>取消</button>
+                <button onClick={()=>(this.setState({reducePointModal: false,  error: '', totalPoint: '', point: '',}))}>取消</button>
               </div>
             </div>
           </Dialog>
