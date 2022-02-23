@@ -47,7 +47,7 @@ const Transitionalert = React.forwardRef(function Transition(props, ref) {
 
 const en={
   search:"Search",
-  title:"Registered Users List",
+  title:"Point Send/Recieve List",
   searchPlaceholder:"Search (User name, User Email)",
   userName:"User Name",
   userNamekana:"Kana Name",
@@ -78,7 +78,7 @@ const en={
 
 const jp={
   search:"検索",
-  title:"登録ユーザー一覧",
+  title:"ポイント送受信一覧",
   searchPlaceholder:"フリーワード検索（ユーザー名、メールアドレス）",
   userName:"ユーザー名",
   userNamekana:"ユーザー名",
@@ -113,15 +113,12 @@ class PointView extends Component {
     this.state = {
       language:JSON.parse(localStorage.language).language,
       filter: {
-        Keywords: "",
-        PageSize: 10,
+        PageSize: 15,
         PageNumber: 1,
       },
       pageCount:0,
       totalRecords:0,
-      userdata:[],
-      SelectedUserids:[],
-      initSelectedArray:true,
+      pointHistory:[],
       Alertmodal:false,
       alertTitle:"",
       alertContent:"",
@@ -136,51 +133,13 @@ class PointView extends Component {
     };
   }
 
-  handleSelectAll = (event) => {   
-    const {userdata,SelectedUserids,filter}=this.state;
-    var pageNumber = filter.PageNumber-1;
-    let newselectedWorksIds=[];
-    if (event.target.checked) {
-      newselectedWorksIds = userdata.map((work) => work.id);
-    } else {
-      newselectedWorksIds = [];
-    }
-    SelectedUserids[pageNumber] = newselectedWorksIds
-    this.setState({
-      SelectedUserids:SelectedUserids
-    });
-  };
-
-  handleSelectOne = (event, id) =>{
-    const {SelectedUserids,filter}=this.state;
-    var pageNumber = filter.PageNumber - 1;
-    const selectedIndex = SelectedUserids[pageNumber].indexOf(id);
-    let newselecteduserIds = [];
-    if (selectedIndex === -1) {
-      newselecteduserIds = newselecteduserIds.concat(SelectedUserids[pageNumber], id);
-    } else if (selectedIndex === 0) {
-      newselecteduserIds = newselecteduserIds.concat(SelectedUserids[pageNumber].slice(1));
-    } else if (selectedIndex === SelectedUserids[pageNumber].length - 1) {
-      newselecteduserIds = newselecteduserIds.concat(SelectedUserids[pageNumber].slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newselecteduserIds = newselecteduserIds.concat(
-        SelectedUserids[pageNumber].slice(0, selectedIndex),
-        SelectedUserids[pageNumber].slice(selectedIndex + 1)
-      );
-    }
-    SelectedUserids[pageNumber] = newselecteduserIds;
-    this.setState({
-      SelectedUserids:SelectedUserids
-    });
-  };
-
   handlePagenation = (events,PageNumber)=>{
     const {filter} = this.state;
     filter.PageNumber = PageNumber;
     this.setState({
         filter:filter
     });
-    this.getuserData(filter);
+    this.getPointHistory(filter);
   }
 
   handlePagecount = (events)=>{
@@ -192,9 +151,8 @@ class PointView extends Component {
     filter.PageNumber = Math.floor(prevepageSize * (prevepageNumber-1) / currentPagesize) + 1
     this.setState({
         filter:filter,
-        initSelectedArray:true
     });
-    this.getuserData(filter);
+    this.getPointHistory(filter);
   }
 
 
@@ -204,51 +162,18 @@ class PointView extends Component {
       });
   }
 
-
-  handleFilterChange = dataFiledName => event=>{
-    this.setState({
-      [dataFiledName]: event.target.value
-    });
-  }
-
-  handleKeyword = (event)=>{
-    const {filter} = this.state;
-    filter.Keywords = event.target.value;
-    this.setState({filter:filter});
-  }
-
-
-  searchbyKeywords = (event) =>{
-    event.preventDefault();
-    var {filter} = this.state;
-    this.setState({
-      initSelectedArray:true,
-    }) 
-    this.getuserData(filter);
-  }
-
-  searchbyKeywordsclick = (event) =>{
-    var {filter} = this.state;
-    this.setState({
-      initSelectedArray:true,
-    }) 
-    this.getuserData(filter);
-  }
-
   componentDidMount(){
-
     const {filter} = this.state;
-    this.getuserData(filter);
-
-  } 
+    this.getPointHistory(filter);
+  }
  
-  getuserData(filter){
+  getPointHistory(filter){
       var userData = JSON.parse(localStorage.userData);
       var token = userData.token;
       var pageCount, totalRecords;
       var config = {
         method: 'post',
-        url: `${baseurl}/api/getusers`,
+        url: `${baseurl}/api/admin/pointhistory`,
         headers: {
           'Authorization': 'Bearer ' + token,
         },
@@ -259,26 +184,13 @@ class PointView extends Component {
       });
       axios(config)
       .then((response) => {
-        var responsedata = response.data.users;
-        pageCount = response.data.pageCount;
-        if(this.state.initSelectedArray)
-        {
-          var SelectedUserids = new Array();
-          for(var i=0; i<=pageCount; i++)
-          {
-            var temp= new Array();
-            SelectedUserids.push(temp);
-          }
-          this.setState({
-            SelectedUserids:SelectedUserids,
-            initSelectedArray:false
-          });
-        }
+        var responsedata = response.data.pointHistory;
         totalRecords = response.data.totalRecord;
+        pageCount = response.data.pageCount
         this.setState({
           pageCount: pageCount,
           totalRecords:totalRecords,
-          userdata:responsedata,
+          pointHistory:responsedata,
           spin:false
         });
       })
@@ -292,152 +204,25 @@ class PointView extends Component {
         this.setState({
           pageCount: 0,
           totalRecords:0,
-          userdata:[],
+          pointHistory:[],
           spin:false
         });
     }); 
   }
 
-  emailModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      emailModal: true
-    })
-  }
-
-  changeEmail = e => {
-    e.preventDefault()
-    const {newEmail, newEmailConfirm, userid} = this.state
-    if (newEmail == '') return
-    if (newEmailConfirm == '') return
-    if (newEmail !=newEmailConfirm) return
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'email': newEmail, 'id': userid})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/changeuseremail`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({emailModal: false, newEmail: '', newEmailConfirm: ''})
-      this.getuserData(this.state.filter)
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-        else {
-          this.setState({
-            error: '他のユーザーが既にそのメールアドレスを使用しています。',
-          })
-        }
-      }
-    })
-  }
-
-  passwordModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      passwordModal: true
-    })
-  }
-
-  changePassword = e => {
-    e.preventDefault()
-    const {userid} = this.state
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'id': userid})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/changeuserpassword`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({passwordModal: false})
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-      }
-    })
-  }
-
-
-  deleteModalOpen = pk => {
-    this.setState({
-      userid: pk,
-      deleteModal: true
-    })
-  }
-
-  deleteUser = e=> {
-    e.preventDefault()
-    const {userid} = this.state
-    var userData = JSON.parse(localStorage.userData);
-    var token = userData.token;
-    var data = JSON.stringify({'id': userid})
-    var config = {
-      method: 'post',
-      url: `${baseurl}/api/admin/deleteuser`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token,
-      },
-      data : data,
-    }
-    axios(config)
-    .then((response)=>{
-      this.setState({deleteModal: false})
-      this.getuserData(this.state.filter)
-    })
-    .catch((error)=>{
-      if (error.response) {
-        if(error.response.status==401){
-          localStorage.removeItem("userData");
-          window.location.assign('/');
-        }
-      }
-    })
-  }
-
   render() {
     const {
-      userdata,
+      pointHistory,
       totalRecords,
-      SelectedUserids,
       language,
       pageCount,
       alertContent,
       alertTitle,
       Alertmodal,
-      emailModal,
       userid,
-      newEmail,
-      newEmailConfirm,
-      error,
-      passwordModal,
-      deleteModal
     } = this.state;
    let pageSize = this.state.filter.PageSize;
    let PageNumber = this.state.filter.PageNumber;
-   var Selectedids = SelectedUserids[PageNumber-1] ? SelectedUserids[PageNumber-1] : [];
    console.log(userid)
    return(
       <Page
@@ -458,34 +243,6 @@ class PointView extends Component {
               <Box mt={3}>
                 <Card>
                   <CardContent>
-                    <Box 
-                      className="search-toolbar"
-                    >                   
-                      <form className="search-form" onSubmit={this.searchbyKeywords}>
-                        <Box className="search-box" alignItems="center">
-                          <TextField
-                            fullWidth
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <SvgIcon
-                                    fontSize="small"
-                                    color="action"
-                                  >
-                                    <SearchIcon />
-                                  </SvgIcon>
-                                </InputAdornment>
-                              )
-                            }}
-                            placeholder={eval(language).searchPlaceholder}
-                            variant="outlined"
-                            onChange={this.handleKeyword}
-                            value={this.state.filter.Keywords}
-                          />
-                          <Button className="search-button" onClick={this.searchbyKeywordsclick}> {eval(language).search} </Button>
-                        </Box>
-                      </form>
-                    </Box>
                     <div className="searchresult">{eval(language).searchresult}:&nbsp;&nbsp;{totalRecords}</div>
                     {totalRecords==0 ? "":
                     <PerfectScrollbar>
@@ -493,98 +250,34 @@ class PointView extends Component {
                         <Table className="result_table">
                           <TableHead>
                             <TableRow>
-                              <TableCell padding="checkbox">
-                                <Checkbox
-                                  checked={Selectedids.length === userdata.length && userdata.length!==0}
-                                  color="primary"
-                                  indeterminate={
-                                    Selectedids.length > 0
-                                    && Selectedids.length < userdata.length
-                                  }
-                                  onChange={this.handleSelectAll}
-                                />
+                              <TableCell>
+                                年月日
                               </TableCell>
                               <TableCell>
-                              {eval(language).userName}
+                                コンテンツ
                               </TableCell>
-                              <TableCell>
-                              {eval(language).userNamekana}
-                              </TableCell>
-                              <TableCell>
-                              {eval(language).email}
-                              </TableCell>
-                              <TableCell>
-                              {eval(language).point}
-                              </TableCell>
-                              <TableCell>
-                              </TableCell>
+                              <TableCell></TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {userdata.map((user) => (
+                            {pointHistory.map((point) => (
                               <TableRow
                                 hover
-                                key={user.pk}
-                                selected={Selectedids.indexOf(user.pk) !== -1}
+                                key={point.pk}
                               >
-                                <TableCell padding="checkbox">
-                                  <Checkbox
-                                    checked={Selectedids.indexOf(user.pk) !== -1}
-                                    onChange={(event) => this.handleSelectOne(event, user.pk)}
-                                    value="true"
-                                  />
+                                <TableCell>
+                                  {(new Date(point.created_at)).getFullYear().toString() + '年' + ((new Date(point.created_at)).getMonth()+1).toString() + '月' + (new Date(point.created_at)).getDate().toString() + '日'}
                                 </TableCell>
                                 <TableCell>
-                                  <Box
-                                    alignItems="center"
-                                    display="flex"
-                                  >
-                                    <Avatar className="avatar"
-                                      src={user.avatar ? `${baseurl}/media/${user.avatar}`:""}
-                                    >
-                                    </Avatar>
-                                    <Typography
-                                      color="textPrimary"
-                                      variant="body1"
-                                    >
-                                      {user.name1 + user.name2}
-                                    </Typography>
-                                  </Box>
+                                  <p dangerouslySetInnerHTML={{__html: point.content.replace(/(?:\r\n|\r|\n)/g, '<br />')}}></p>
                                 </TableCell>
                                 <TableCell>
-                                {user.kana1 + user.kana2}
-                                </TableCell>
-                                <TableCell>
-                                {user.email}
-                                </TableCell>
-                                <TableCell>
-                                {user.point}
-                                </TableCell>
-                                <TableCell>
-                                  {/* <Button
+                                  <Button
                                     className="btn btn-detail"
-                                    onClick={e=>{window.location.assign(`user/detail/${user.pk}`)}}
+                                    onClick={e=>{window.location.assign(`point/detail/${point.pk}`)}}
                                   >
-                                   {eval(language).detail}
+                                    詳   細
                                   </Button>
-                                  <Button
-                                    className='btn btn-primary'
-                                    onClick={()=>this.emailModalOpen(user.pk)}
-                                  >
-                                    メールア変更
-                                  </Button>
-                                  <Button
-                                    className='btn btn-primary'
-                                    onClick={()=>this.passwordModalOpen(user.pk)}
-                                  >
-                                    パスワード変更
-                                  </Button>
-                                  <Button
-                                    className='btn btn-delete'
-                                    onClick={()=>this.deleteModalOpen(user.pk)}
-                                  >
-                                    削除
-                                  </Button> */}
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -597,9 +290,9 @@ class PointView extends Component {
                       <Box className="pageCountarea">
                           <label>{eval(language).pageShow}:
                               <select className="pageCount" value={pageSize} onChange={this.handlePagecount}>
-                                  <option value={5}>5</option>
-                                  <option value={10}>10</option>
-                                  <option value={20}>20</option>
+                                  <option value={15}>15</option>
+                                  <option value={30}>30</option>
+                                  <option value={50}>50</option>
                               </select>
                           </label>
                       </Box>
@@ -630,120 +323,7 @@ class PointView extends Component {
               </div>
             </DialogContent>
           </Dialog>
-          <Dialog
-            open={emailModal}
-            onClose={(e)=>(this.setState({emailModal: false, newEmail: '', newEmailConfirm: '', error: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-                <h2>メール変更</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <label>新しいメール</label>
-                        </TableCell>
-                        <TableCell>
-                          <input type="email" value={newEmail} onChange={(e)=>this.setState({newEmail: e.target.value, error: ''})} />
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>
-                          <label>新しいメール確認</label>
-                        </TableCell>
-                        <TableCell>
-                          <input type="email" value={newEmailConfirm} onChange={(e)=>this.setState({newEmailConfirm: e.target.value, error: ''})} />
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.changeEmail}>メール変更</button>
-                <button onClick={()=>(this.setState({emailModal: false, newEmail: '', newEmailConfirm: '', error: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
-          <Dialog
-            open={passwordModal}
-            onClose={(e)=>(this.setState({passwordModal: false, error: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-                <h2>パスワード変更</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <h3>このユーザーのパスワードを本当に変更しますか？</h3>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.changePassword}>パスワード変更</button>
-                <button onClick={()=>(this.setState({passwordModal: false,  error: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
-          <Dialog
-            open={deleteModal}
-            onClose={(e)=>(this.setState({deleteModal: false, error: ''}))}
-          >
-            <div className='modal-body' onClick={(e)=>e.stopPropagation()}>
-              <div className='modal-email'>
-                <h2>ユーザー削除</h2>
-                <div className='modal-email-main'>
-                  <div className='modal-img'>
-                    <img src={userdata.filter(user=>(user.pk == userid))[0]?.avatar?`${baseurl}/media/${userdata.filter(user=>(user.pk == userid))[0]?.avatar}`:"/assets/image/avatar.svg"} />
-                  </div>
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>
-                          <label>ユーザー名</label>
-                        </TableCell>
-                        <TableCell>
-                          {userdata.filter(user=>(user.pk==userid))[0]?.name1 + userdata.filter(user=>(user.pk==userid))[0]?.name2}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-              <h3>このユーザーを本当に削除してもよろしいですか？</h3>
-              <p className='modal-error'>{error}</p>
-              <div className='modal-link'>
-                <button onClick={this.deleteUser}>ユーザー削除</button>
-                <button onClick={()=>(this.setState({deleteModal: false,  error: ''}))}>取消</button>
-              </div>
-            </div>
-          </Dialog>
+          
         <Dialog
             className="spin-modal"
             open={this.state.spin}      

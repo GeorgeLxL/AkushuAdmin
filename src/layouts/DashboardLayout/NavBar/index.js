@@ -121,7 +121,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
               </Button>
             </ListItem>
 
-            {/* <ListItem
+            <ListItem
               className="item"
             >
               <Button
@@ -141,7 +141,7 @@ const NavBar = ({ onMobileClose, openMobile }) => {
                 {eval(language).accountlabel}
                 </span>
               </Button>
-            </ListItem> */}
+            </ListItem>
         </List>
       </Box>
       <Box flexGrow={1} />
