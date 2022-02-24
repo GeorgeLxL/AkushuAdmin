@@ -1129,3 +1129,7 @@ right: -10px;
 .prequestion td:first-child {
     width: 400px;
 }
+.invited p {
+    display: inline-block;
+    margin-right: 2em;
+}

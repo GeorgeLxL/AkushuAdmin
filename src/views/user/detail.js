@@ -14,7 +14,8 @@ import {
   Tab,
   Tabs,
   AppBar,
-  TableHead
+  TableHead,
+  Typography
 } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Page from 'src/components/Page';
@@ -113,6 +114,10 @@ class UserDetail extends Component {
         language:JSON.parse(localStorage.language).language,
         userid:"",
         userdata:{},
+        instructor: {},
+        instructor1: {},
+        invited: [],
+        invited1: [],
         spin:false,
         value:0,
         pointhistory:[],
@@ -161,6 +166,10 @@ class UserDetail extends Component {
       var userdata = JSON.parse(response.data.user)[0];
       this.setState({
         userdata:userdata.fields,
+        instructor: response.data.instructor == null? {}: response.data.instructor,
+        instructor1: response.data.instructor1 == null? {}: response.data.instructor1,
+        invited: JSON.parse(response.data.invited),
+        invited1: response.data.invited1,
         spin:false
       });
       this.getUserPointHistory(id);
@@ -443,7 +452,6 @@ class UserDetail extends Component {
     .then((response) => {
       if (response.data.prequestion) {
         var prequestion_main = JSON.parse(response.data.prequestion)[0]
-        console.log(prequestion_main)
         this.setState({
           prequestion: true,
           business: prequestion_main.fields.business,
@@ -471,6 +479,10 @@ class UserDetail extends Component {
 
   render() {
     const {userdata,
+      instructor,
+      instructor1,
+      invited,
+      invited1,
       language,
       userid,
       value,
@@ -486,6 +498,7 @@ class UserDetail extends Component {
       financial,
       prequestion_content
     } = this.state;
+    console.log(invited, invited1, pointhistory)
       return(
         <Page
           className="root"
@@ -607,7 +620,7 @@ class UserDetail extends Component {
                                   </TableCell>
                                   <TableCell colSpan="4">
                                   {userdata.birthday}
-                                  </TableCell>                                    
+                                  </TableCell>
                               </TableRow>
                               <TableRow>
                                   <TableCell className="filedname">
@@ -619,7 +632,7 @@ class UserDetail extends Component {
                                     src={userdata.avatar ? `${baseurl}/media/${userdata.avatar}`:""}
                                   >
                                   </Avatar>
-                                  </TableCell>                                    
+                                  </TableCell>
                               </TableRow>
                               {/* <TableRow>
                                   <TableCell className="filedname">
@@ -648,6 +661,114 @@ class UserDetail extends Component {
                                   {userdata.accountName}
                                   </TableCell>
                               </TableRow> */}
+                              <TableRow>
+                                <TableCell className='filedname'>
+                                  １親等紹介者
+                                </TableCell>
+                                {
+                                  instructor.email?
+                                  <>
+                                    <TableCell>
+                                      <Box
+                                        alignItems="center"
+                                        display="flex"
+                                      >
+                                        <Avatar className="avatar"
+                                          src={instructor.avatar ? `${baseurl}/media/${instructor.avatar}`:""}
+                                        >
+                                        </Avatar>
+                                        <Typography
+                                          color="textPrimary"
+                                          variant="body1"
+                                        >
+                                          {instructor.name}
+                                        </Typography>
+                                      </Box>
+                                    </TableCell>
+                                    <TableCell colSpan="3">
+                                      {instructor.email}
+                                    </TableCell>
+                                  </>
+                                  :
+                                  <TableCell colSpan="4">１親等紹介者はいません。</TableCell>
+                                }
+                              </TableRow>
+                              {
+                                instructor.email?
+                                <TableRow>
+                                  <TableCell className='filedname'>
+                                    ２親等紹介者
+                                  </TableCell>
+                                  {
+                                    instructor1.email?
+                                    <>
+                                      <TableCell>
+                                        <Box
+                                          alignItems="center"
+                                          display="flex"
+                                        >
+                                          <Avatar className="avatar"
+                                            src={instructor1.avatar ? `${baseurl}/media/${instructor1.avatar}`:""}
+                                          >
+                                          </Avatar>
+                                          <Typography
+                                            color="textPrimary"
+                                            variant="body1"
+                                          >
+                                            {instructor1.name}
+                                          </Typography>
+                                        </Box>
+                                      </TableCell>
+                                      <TableCell colSpan="3">
+                                        {instructor1.email}
+                                      </TableCell>
+                                    </>
+                                    :
+                                    <TableCell colSpan="4">２親等紹介者はいません。</TableCell>
+                                  }
+                                </TableRow>
+                                :
+                                <></>
+                              }
+                              <TableRow>
+                                <TableCell className='filedname'>紹介した人（１親等）</TableCell>
+                                <TableCell colSpan="4" className="invited">
+                                  {
+                                    invited.length>0?
+                                    <>
+                                    {
+                                      invited.map(i=>(
+                                        <p key={i.pk}>{i.fields.name1 + i.fields.name2}</p>
+                                      ))
+                                    }
+                                    </>
+                                    :
+                                    <>紹介した人はいません。</>
+                                  }
+                                </TableCell>
+                              </TableRow>
+                              {
+                                invited.length>0?
+                                <TableRow>
+                                  <TableCell className='filedname'>紹介した人（２親等）</TableCell>
+                                  <TableCell colSpan="4" className="invited">
+                                  {
+                                    invited1.length>0?
+                                    <>
+                                    {
+                                      invited1.map(i=>(
+                                        <p key={i.pk}>{i.name1 + i.name2}</p>
+                                      ))
+                                    }
+                                    </>
+                                    :
+                                    <>紹介した人はいません。</>
+                                  }
+                                </TableCell>
+                                </TableRow>
+                                :
+                                <></>
+                              }
                           </TableBody>
                           </Table>
                       </Box>
